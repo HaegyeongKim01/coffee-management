@@ -37,7 +37,16 @@ public class ProductJdbcRepository implements ProductRepository{
 
     @Override
     public Product update(Product product) {
-        return null;
+        var update = jdbcTemplate.update(
+          "update products set product_name = :productName, category = :category, price = :price, description = :description, created_at = :createdAt, updated_at = :updatedAt" +
+                  " where product_id = UNHEX(REPLACE(:productId, '-', ''))",
+                toParamMap(product)
+        );
+        if (update != 1) {
+            throw new RuntimeException("Noting was updated");
+        }
+
+        return product;
     }
 
     @Override
