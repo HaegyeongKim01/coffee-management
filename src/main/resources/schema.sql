@@ -1,3 +1,4 @@
+USE coffee_mgmt;
 CREATE TABLE products
 (
     product_id   BINARY(16) PRIMARY KEY,
@@ -7,5 +8,4 @@ CREATE TABLE products
     description  VARCHAR(500) DEFAULT NULL,
     created_at   datetime(6)  NOT NULL,
     updated_at   datetime(6)  DEFAULT NULL
-
-)
+);
