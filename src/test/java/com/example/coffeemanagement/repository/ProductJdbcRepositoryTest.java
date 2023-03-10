@@ -22,6 +22,7 @@ import static com.wix.mysql.config.MysqldConfig.*;
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class) //순서보장 위해
 @ActiveProfiles("test")    //Test Profile 위해 annotation 추가
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProductJdbcRepositoryTest {
 
     static EmbeddedMysql embeddedMysql;
@@ -46,7 +47,7 @@ class ProductJdbcRepositoryTest {
     @Autowired
     ProductRepository repository;
 
-    private final Product newProduct = new Product(UUID.randomUUID(), "new-product", Category.COFFEE_BEAN_PACKAGE, 1000L);
+    private static final Product newProduct = new Product(UUID.randomUUID(), "new-product", Category.COFFEE_BEAN_PACKAGE, 1000L);
 
 
     @Test
@@ -57,4 +58,29 @@ class ProductJdbcRepositoryTest {
         var all = repository.findAll();
         assertThat(all.isEmpty(), is(false));
     }
+
+    @Test
+    @Order(2)
+    @DisplayName("상품을 이름으로 조회할 수 있다.")
+    void testFindByName() {
+        var product = repository.findByName(newProduct.getProductName());
+        assertThat(product.isEmpty(), is(false));
+    }
+
+    @Test
+    @Order(3)
+    @DisplayName("상품을 상품 아이디로 조회할 수 있다.")
+    void testFindById() {
+        var product = repository.findById(newProduct.getProductId());
+        assertThat(product.isEmpty(), is(false));
+    }
+
+    @Test
+    @Order(4)
+    @DisplayName("상품들을 카테고리로 조회할 수 있다.")
+    void testFindByCategory() {
+        var product = repository.findByCategory(newProduct.getCategory());
+        assertThat(product.isEmpty(), is(false));
+    }
+
 }

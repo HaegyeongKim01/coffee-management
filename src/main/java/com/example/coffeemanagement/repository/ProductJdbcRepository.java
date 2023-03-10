@@ -2,6 +2,7 @@ package com.example.coffeemanagement.repository;
 
 import com.example.coffeemanagement.model.Category;
 import com.example.coffeemanagement.model.Product;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -41,17 +42,34 @@ public class ProductJdbcRepository implements ProductRepository{
 
     @Override
     public Optional<Product> findById(UUID productId) {
-        return Optional.empty();
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject("select * from products where product_id = UNHEX(REPLACE(:productId, '-', ''))", //window 환경이기에 UNHEX로 사용
+                            Collections.singletonMap("productId", productId.toString().getBytes()), productRowMapper)
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
     public Optional<Product> findByName(String productName) {
-        return Optional.empty();
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject("select * from products where product_name = :productName",
+                    Collections.singletonMap("productName", productName), productRowMapper)
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 
     @Override
     public List<Product> findByCategory(Category category) {
-        return null;
+        return jdbcTemplate.query(
+                "select * from products where category = :category",
+                Collections.singletonMap("category", category.toString()),  //Category는 enum이기에 String 으로 변환 후 전달
+                productRowMapper
+        );
     }
 
     @Override
