@@ -83,4 +83,12 @@ class ProductJdbcRepositoryTest {
         assertThat(product.isEmpty(), is(false));
     }
 
+    @Test
+    @Order(5)
+    @DisplayName("상품 전체를 삭제한다.")
+    void testDeleteAll() {
+        repository.deleteAll();
+        var all = repository.findAll();
+        assertThat(all.isEmpty(), is(true));
+    }
 }
