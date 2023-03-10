@@ -4,12 +4,13 @@ import com.example.coffeemanagement.model.Category;
 import com.example.coffeemanagement.model.Product;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import java.util.*;
 
 import static com.example.coffeemanagement.JdbcUtils.*;
 
-
+@Repository
 public class ProductJdbcRepository implements ProductRepository{
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
@@ -25,7 +26,12 @@ public class ProductJdbcRepository implements ProductRepository{
 
     @Override
     public Product insert(Product product) {
-        return null;
+        var update = jdbcTemplate.update("INSERT INTO products(product_id, product_name, category, price, description, created_at, updated_at)" +
+                " VALUES(UNHEX(REPLACE(:productId, '-', '')), :productName, :category, :price, :description, :createdAt, :updatedAt)", toParamMap(product));
+        if (update != 1) {
+            throw new RuntimeException("Nothing was inserted");
+        }
+        return product;
     }
 
     @Override
@@ -65,5 +71,16 @@ public class ProductJdbcRepository implements ProductRepository{
     };
 
 
+    private Map<String, Object> toParamMap(Product product) {
+        var paramMap = new HashMap<String, Object>();
+        paramMap.put("productId", product.getProductId().toString().getBytes());
+        paramMap.put("productName", product.getProductName());
+        paramMap.put("category", product.getCategory().toString());
+        paramMap.put("price", product.getPrice());
+        paramMap.put("description", product.getDescription());
+        paramMap.put("createdAt", product.getCreatedAt());
+        paramMap.put("updatedAt", product.getUpdatedAt());
+        return paramMap;
+    }
 
 }
